@@ -1,23 +1,47 @@
-import urllib
-import twurl
-import json
-import sqlite3
+import sqlite3 as lite
+import sys
 
-TWITTER_URL =  'https://api.twitter.com/1.1/friends/list.json'
+def main():
+    con = None
+    
+    try:
+        con = lite.connect('test.db')
+        
+        cur = con.cursor()
+        cur.execute('SELECT SQLITE_VERSION()')
+        
+        data = cur.fetchone()
 
-conn = sqlite3.connect('spider.sqlite3')
-cur = conn.cursor()
+        print ("SQLite version:", *data)
 
-cur.execute("'CREATE TABLE IF NOT EXISTS Twitter (name TEXT, retrieved INTEGER, friends INTEGER)'")
+    except lite.Error as e:
+        
+        print ("Error:" *e.args[0])
+        sys.exit(1)
+    
+    finally:
+        
+        if con:
+            con.close()
 
-while True:
-    acct = raw_input('Enter a Twitter account, or quit: ')
-    if (acct == 'quit') : break
-    if (len(acct) < 1):
-        cur.execute('SELECT  name FROM Twitter WHERE retrived = 0 LIMIT 1')
-        try:
-            acct = cur.fetchone()[0]
-        except:
-            print('No unretrived Twitter accounts found')
-            continue
+def CreateCarsTable():
+    
+    con = lite.connect('test.db')
+    
+    with con:
+        
+        cur = con.cursor()
+        cur.execute("CREATE TABLE Cars (Id INT, Name TEXT, Price INT)")
+        cur.execute("INSERT INTO Cars VALUES(1, 'Audi', 52642)")
+        cur.execute("INSERT INTO Cars VALUES(2, 'Mercedes', 57127)")
+        cur.execute("INSERT INTO Cars VALUES(3, 'Skoda', 9000)")
+        cur.execute("INSERT INTO Cars VALUES(4, 'Volvo', 29000)")
+        cur.execute("INSERT INTO Cars VALUES(5, 'Bentley', 350000)")
+        cur.execute("INSERT INTO Cars VALUES(6, 'Citroen', 21000)")
+        cur.execute("INSERT INTO Cars VALUES(7, 'Hummer', 41400)")
+        cur.execute("INSERT INTO Cars VALUES(8, 'Volkswagen', 21600)")
 
+
+if __name__ == "__main__":
+    main()
+    CreateCarsTable()
