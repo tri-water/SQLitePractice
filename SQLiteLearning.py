@@ -260,6 +260,40 @@ def readImageFromDB():
         print("Error:", e.args[0])
         sys.exit(1)
 
+def DBinfo():
+
+    con = lite.connect('test.db')
+    
+    with con:
+
+        cur = con.cursor()
+         
+        # Table Information
+        cur.execute("PRAGMA table_info(Cars)")
+
+        data = cur.fetchall()
+    
+        for d in data:
+            print("%s %-5s %s" % (d[0], d[1], d[2]))
+
+        # row information
+        cur.execute("SELECT * FROM Cars")
+        
+        col_names = [cn[0] for cn in cur.description]
+
+        rows = cur.fetchall()
+        
+        print("%s %-10s %s" %( col_names[0], col_names[1], col_names[2]))
+
+        for row in rows:
+            print("%2s %-10s %s" % row)
+
+        # all tables in DB
+        cur.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+        rows = cur.fetchall()
+        for row in rows:
+            print(row[0])
+
 if __name__ == "__main__":
     
-    readImageFromDB()
+    DBinfo()
