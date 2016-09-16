@@ -164,6 +164,102 @@ def DictCursor():
         for row in rows:
             print(row['Id'], row['Name'], row['Price'])
 
+def ParaQuery():
+    
+    uId = 1
+    uPrice = 62300
+
+    con = lite.connect('test.db')
+    
+    with con:
+        
+        cur = con.cursor()
+        
+        cur.execute("UPDATE Cars SET Price = ? WHERE Id = ?", (uPrice, uId))
+        con.commit()
+
+        print("Number of rows updated:", cur.rowcount)
+        
+        uId = 4
+        cur.execute("SELECT Name, Price FROM Cars WHERE Id = :Id", {"Id": uId})
+        row = cur.fetchone()
+        print(*row)
+
+
+def readImage():
+       
+    try:
+        fin = open("woman.jpg", "rb")
+        img = fin.read()
+        return img
+    
+    except IOError as e:
+        
+        print("Error", e.args[0], e.args[1])
+        sys.exit(1)
+
+    finally:
+        
+        if fin:
+            fin.close()
+
+
+def SaveImageInDB():
+    
+    try:
+        con = lite.connect('test.db')
+        
+        cur = con.cursor()
+        data = readImage()
+        binary = lite.Binary(data)
+        cur.execute("CREATE TABLE Images(Id INTEGER PRIMARY KEY, Data BLOB)")
+        cur.execute("INSERT INTO Images(Data) VALUES (?)", (binary,))
+
+        con.commit()
+
+    except lite.Error as e:
+        
+        if con:
+            con.rollback()
+
+        print("Error:", e.args[0])
+
+    finally:
+    
+        if con:
+            con.close()
+
+def writeImage(data):
+    
+    try:
+        fout = open('woman2.jpg', 'wb')
+        fout.write(data)
+
+    except IOError as e:
+        print("Error: ", e.args[0], e.args[1])
+        sys.exit(1)
+
+    finally:
+        
+        if fout:
+            fout.close()
+
+def readImageFromDB():
+
+    try:
+        con = lite.connect('test.db')
+        
+        cur = con.cursor()
+        cur.execute("SELECT Data FROM Images LIMIT 1")
+        data = cur.fetchone()[0]
+
+        writeImage(data)
+
+    except lite.Error as e:
+    
+        print("Error:", e.args[0])
+        sys.exit(1)
+
 if __name__ == "__main__":
     
-    DictCursor()
+    readImageFromDB()
